@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>儿童奖励系统</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4A9DFF',
+                        secondary: '#FF9F45',
+                        accent: '#FF6B98',
+                        success: '#51CF66',
+                        warning: '#FFD43B',
+                        danger: '#FF6B6B',
+                        light: '#F8F9FA',
+                        dark: '#343A40',
+                        'pastel-blue': '#E6F0FF',
+                        'pastel-pink': '#FFE6F0',
+                        'pastel-yellow': '#FFF6E0',
+                        'pastel-green': '#E6FFE6',
+                    },
+                    fontFamily: {
+                        sans: ['Comic Sans MS', 'Arial', 'sans-serif'],
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 2s infinite',
+                        'wiggle': 'wiggle 1s ease-in-out infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        wiggle: {
+                            '0%, 100%': { transform: 'rotate(-3deg)' },
+                            '50%': { transform: 'rotate(3deg)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+            .card-hover {
+                @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+            }
+            .btn-bounce:active {
+                transform: scale(0.95);
+            }
+            .bg-pattern {
+                background-image: url('https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/8fb2c828334f46228b9db0ad4c776966~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260426093425E76305F692C7B43936A6&rrcfp=f06b921b&x-expires=1779759333&x-signature=ZNflomeXkmhDT34gGs5etWodzNY%3D');
+                background-size: 200px;
+                background-repeat: repeat;
+                opacity: 0.1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-pastel-blue min-h-screen font-sans relative overflow-hidden">
+    <!-- 背景图案 -->
+    <div class="fixed inset-0 bg-pattern z-0"></div>
+    
+    <div class="container mx-auto px-4 py-8 relative z-10">
+        <!-- 标题区域 -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-primary text-shadow mb-2">
+                <i class="fa fa-star text-warning animate-pulse"></i>
+                儿童奖励系统
+                <i class="fa fa-star text-warning animate-pulse"></i>
+            </h1>
+            <p class="text-lg text-gray-600">每3个贴纸兑换1朵小红花，每5朵小红花可兑换1元</p>
+        </header>
+        
+        <!-- 数据总览卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- 贴纸卡片 -->
+            <div class="bg-white rounded-2xl shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-secondary mb-1">贴纸数量</h3>
+                        <p class="text-4xl font-bold text-secondary" id="sticker-count">0</p>
+                    </div>
+                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/3a3e33b34bc341b0b833a9201b6dd423~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260426093425E76305F692C7B43936A6&rrcfp=f06b921b&x-expires=1779759297&x-signature=q6yLS%2BD9ttZBNFu8BfuOc7rqoIs%3D" 
+                         alt="贴纸" class="w-20 h-20 object-contain animate-float">
+                </div>
+                <div class="mt-4 flex justify-between">
+                    <button id="add-sticker" class="bg-secondary hover:bg-orange-500 text-white font-bold py-2 px-4 rounded-full btn-bounce flex items-center">
+                        <i class="fa fa-plus mr-2"></i> 添加贴纸
+                    </button>
+                    <button id="exchange-flower" class="bg-primary hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full btn-bounce flex items-center" disabled>
+                        <i class="fa fa-exchange mr-2"></i> 兑换小红花
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 小红花卡片 -->
+            <div class="bg-white rounded-2xl shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-accent mb-1">小红花数量</h3>
+                        <p class="text-4xl font-bold text-accent" id="flower-count">0</p>
+                    </div>
+                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/e0722d7f526d41efa9174339e8c37fdd~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260426093425E76305F692C7B43936A6&rrcfp=f06b921b&x-expires=1779759293&x-signature=fKyE6kt73%2BQG5FgsT85oM0wGrZM%3D" 
+                         alt="小红花" class="w-20 h-20 object-contain animate-float">
+                </div>
+                <div class="mt-4 flex justify-between">
+                    <button id="add-flower" class="bg-accent hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-full btn-bounce flex items-center">
+                        <i class="fa fa-plus mr-2"></i> 添加小红花
+                    </button>
+                    <button id="exchange-money" class="bg-success hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full btn-bounce flex items-center" disabled>
+                        <i class="fa fa-exchange mr-2"></i> 兑换零花钱
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 零花钱卡片 -->
+            <div class="bg-white rounded-2xl shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-success mb-1">零花钱 (元)</h3>
+                        <p class="text-4xl font-bold text-success" id="money-count">0.00</p>
+                    </div>
+                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/3067e00e28ad40c9bdb596b7a53fb2d6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260426093425E76305F692C7B43936A6&rrcfp=f06b921b&x-expires=1779759294&x-signature=J3fOqb%2FAKR%2F9l6T14pK1Y3Pcg08%3D" 
+                         alt="零花钱" class="w-20 h-20 object-contain animate-float">
+                </div>
+                <div class="mt-4 flex justify-between">
+                    <button id="add-money" class="bg-success hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full btn-bounce flex items-center">
+                        <i class="fa fa-plus mr-2"></i> 添加零花钱
+                    </button>
+                    <button id="deduct-flower" class="bg-danger hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full btn-bounce flex items-center">
+                        <i class="fa fa-minus mr-2"></i> 扣除小红花
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+
+        
+
+        
+        <!-- 数据管理区域 -->
+        <div class="bg-white rounded-2xl shadow-md p-6 mb-8 card-hover">
+            <h3 class="text-2xl font-bold text-primary mb-4 flex items-center">
+                <i class="fa fa-database mr-2"></i> 数据管理
+            </h3>
+            <div class="flex flex-wrap gap-4 justify-center">
+                <button id="export-data" class="bg-primary hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg btn-bounce flex items-center">
+                    <i class="fa fa-download mr-2"></i> 导出数据
+                </button>
+                <button id="import-data" class="bg-secondary hover:bg-orange-500 text-white font-bold py-3 px-6 rounded-lg btn-bounce flex items-center">
+                    <i class="fa fa-upload mr-2"></i> 导入数据
+                </button>
+                <input type="file" id="file-input" accept=".json" class="hidden">
+                <button id="reset-data" class="bg-danger hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg btn-bounce flex items-center">
+                    <i class="fa fa-refresh mr-2"></i> 重置数据
+                </button>
+            </div>
+        </div>
+        
+        <!-- 历史记录区域 -->
+        <div class="bg-white rounded-2xl shadow-md p-6 card-hover">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
+                <h3 class="text-2xl font-bold text-dark flex items-center">
+                    <i class="fa fa-history mr-2"></i> 历史记录
+                </h3>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center w-full md:w-auto gap-2">
+                    <input type="text" id="search-history" placeholder="搜索记录..." class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-auto">
+                    <button id="clear-history" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg btn-bounce flex items-center justify-center w-full sm:w-auto">
+                        <i class="fa fa-trash mr-2"></i> 清空记录
+                    </button>
+                </div>
+            </div>
+            <div class="max-h-96 overflow-auto">
+                <div id="history-container" class="space-y-3">
+                    <!-- 历史记录将通过JavaScript动态添加为卡片 -->
+                </div>
+            </div>
+            <div id="no-history" class="text-center py-8 text-gray-500">
+                <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/37f09bdc20b741cb9971e6f1619dfc58~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260426093425E76305F692C7B43936A6&rrcfp=f06b921b&x-expires=1779759330&x-signature=5LcK%2BOc9gxhenvJ2XIRvrmkRgLA%3D" 
+                     alt="空记录" class="w-24 h-24 object-contain mx-auto mb-4">
+                <p>暂无历史记录</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 模态框 -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-2xl font-bold text-primary">提示</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <p id="modal-content" class="text-gray-600 mb-6"></p>
+            <div class="flex justify-end">
+                <button id="modal-confirm" class="bg-primary hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg btn-bounce">
+                    确定
+                </button>
+            </div>
+        </div>
+    </div>
+    
+
+    
+    <script>
+        // 初始化数据
+        let data = {
+            stickers: 0,
+            flowers: 0,
+            money: 0,
+            history: []
+        };
+        
+
+        
+        // 加载本地存储的数据
+        function loadData() {
+            const savedData = localStorage.getItem('rewardSystemData');
+            if (savedData) {
+                data = JSON.parse(savedData);
+                updateUI();
+                updateHistoryTable();
+            }
+        }
+        
+        // 保存数据到本地存储
+        function saveData() {
+            localStorage.setItem('rewardSystemData', JSON.stringify(data));
+        }
+        
+        // 更新UI显示
+        function updateUI() {
+            document.getElementById('sticker-count').textContent = data.stickers;
+            document.getElementById('flower-count').textContent = data.flowers;
+            document.getElementById('money-count').textContent = data.money.toFixed(2);
+            
+            // 更新兑换按钮状态
+            document.getElementById('exchange-flower').disabled = data.stickers < 3;
+            document.getElementById('exchange-money').disabled = data.flowers < 5;
+            
+            // 更新按钮样式
+            const exchangeFlowerBtn = document.getElementById('exchange-flower');
+            const exchangeMoneyBtn = document.getElementById('exchange-money');
+            
+            if (data.stickers >= 3) {
+                exchangeFlowerBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                exchangeFlowerBtn.classList.add('hover:bg-blue-600');
+            } else {
+                exchangeFlowerBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                exchangeFlowerBtn.classList.remove('hover:bg-blue-600');
+            }
+            
+            if (data.flowers >= 5) {
+                exchangeMoneyBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                exchangeMoneyBtn.classList.add('hover:bg-green-600');
+            } else {
+                exchangeMoneyBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                exchangeMoneyBtn.classList.remove('hover:bg-green-600');
+            }
+        }
+        
+        // 更新历史记录卡片
+        function updateHistoryTable() {
+            const historyContainer = document.getElementById('history-container');
+            const noHistory = document.getElementById('no-history');
+            
+            if (data.history.length === 0) {
+                historyContainer.innerHTML = '';
+                noHistory.classList.remove('hidden');
+                return;
+            }
+            
+            noHistory.classList.add('hidden');
+            
+            // 按时间倒序排序
+            const sortedHistory = [...data.history].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            historyContainer.innerHTML = sortedHistory.map(record => {
+                const typeClass = record.type === 'reward' ? 'bg-success bg-opacity-10 border-success' : 'bg-danger bg-opacity-10 border-danger';
+                const textClass = record.type === 'reward' ? 'text-success' : 'text-danger';
+                const typeIcon = record.type === 'reward' ? 'fa-plus-circle' : 'fa-minus-circle';
+                const itemIcon = record.item === 'sticker' ? 
+                    '<img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/3a3e33b34bc341b0b833a9201b6dd423~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260426093425E76305F692C7B43936A6&rrcfp=f06b921b&x-expires=1779759297&x-signature=q6yLS%2BD9ttZBNFu8BfuOc7rqoIs%3D" alt="贴纸" class="w-6 h-6 inline-block mr-1">' : 
+                    (record.item === 'flower' ? 
+                        '<img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/e0722d7f526d41efa9174339e8c37fdd~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260426093425E76305F692C7B43936A6&rrcfp=f06b921b&x-expires=1779759293&x-signature=fKyE6kt73%2BQG5FgsT85oM0wGrZM%3D" alt="小红花" class="w-6 h-6 inline-block mr-1">' : 
+                        '<img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/3067e00e28ad40c9bdb596b7a53fb2d6~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260426093425E76305F692C7B43936A6&rrcfp=f06b921b&x-expires=1779759294&x-signature=J3fOqb%2FAKR%2F9l6T14pK1Y3Pcg08%3D" alt="零花钱" class="w-6 h-6 inline-block mr-1">');
+                
+                const itemName = record.item === 'sticker' ? '贴纸' : (record.item === 'flower' ? '小红花' : '零花钱');
+                const action = record.type === 'reward' ? '获得' : '扣除';
+                
+                return `
+                    <div class="p-3 rounded-lg border ${typeClass} history-card">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center">
+                                <span class="${textClass} mr-2">
+                                    <i class="fa ${typeIcon}"></i>
+                                </span>
+                                <span class="${textClass} font-bold">${itemIcon}${itemName}${action}</span>
+                            </div>
+                            <span class="text-sm text-gray-500">${formatDate(record.timestamp)}</span>
+                        </div>
+                        <div class="mt-2 flex justify-between items-center">
+                            <span class="font-bold text-lg">${record.amount}</span>
+                            ${record.reason ? `<span class="text-sm bg-gray-100 px-2 py-1 rounded">${record.reason}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // 格式化日期
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return `${date.getFullYear()}-${padZero(date.getMonth() + 1)}-${padZero(date.getDate())} ${padZero(date.getHours())}:${padZero(date.getMinutes())}:${padZero(date.getSeconds())}`;
+        }
+        
+        // 数字补零
+        function padZero(num) {
+            return num.toString().padStart(2, '0');
+        }
+        
+
+        
+        // 显示模态框
+        function showModal(title, content, confirmCallback = null) {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+            const modalConfirm = document.getElementById('modal-confirm');
+            const closeModal = document.getElementById('close-modal');
+            
+            modalTitle.textContent = title;
+            modalContent.textContent = content;
+            
+            modal.classList.remove('hidden');
+            
+            const hideModal = () => {
+                modal.classList.add('hidden');
+            };
+            
+            closeModal.onclick = hideModal;
+            
+            modalConfirm.onclick = () => {
+                hideModal();
+                if (confirmCallback) {
+                    confirmCallback();
+                }
+            };
+        }
+        
+        // 显示成就动画
+        function showAchievement(text) {
+            const achievement = document.getElementById('achievement');
+            const achievementText = document.getElementById('achievement-text');
+            
+            achievementText.textContent = text;
+            achievement.classList.remove('translate-x-full');
+            
+            setTimeout(() => {
+                achievement.classList.add('translate-x-full');
+            }, 3000);
+        }
+        
+        // 添加记录到历史
+        function addHistory(type, item, amount, reason = '') {
+            data.history.push({
+                timestamp: new Date().toISOString(),
+                type, // 'reward' 或 'punish'
+                item, // 'sticker', 'flower' 或 'money'
+                amount,
+                reason
+            });
+            
+            updateHistoryTable();
+            saveData();
+        }
+        
+        // 添加贴纸
+        function addSticker(amount, reason = '') {
+            data.stickers += amount;
+            updateUI();
+            addHistory('reward', 'sticker', amount, reason);
+            
+            // 检查是否可以兑换小红花
+            if (data.stickers >= 3) {
+                document.getElementById('exchange-flower').disabled = false;
+                document.getElementById('exchange-flower').classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('exchange-flower').classList.add('hover:bg-blue-600');
+            }
+        }
+        
+        // 添加小红花
+        function addFlower(amount, reason = '') {
+            data.flowers += amount;
+            updateUI();
+            addHistory('reward', 'flower', amount, reason);
+            
+            // 检查是否可以兑换零花钱
+            if (data.flowers >= 5) {
+                document.getElementById('exchange-money').disabled = false;
+                document.getElementById('exchange-money').classList.remove('opacity-50', 'cursor-not-allowed');
+                document.getElementById('exchange-money').classList.add('hover:bg-green-600');
+            }
+        }
+        
+        // 添加零花钱
+        function addMoney(amount, reason = '') {
+            data.money += amount;
+            updateUI();
+            addHistory('reward', 'money', amount, reason);
+        }
+        
+        // 扣除小红花
+        function deductFlower(amount, reason = '') {
+            data.flowers -= amount;
+            updateUI();
+            addHistory('punish', 'flower', amount, reason);
+            
+            // 检查是否仍然可以兑换零花钱
+            if (data.flowers < 5) {
+                document.getElementById('exchange-money').disabled = true;
+                document.getElementById('exchange-money').classList.add('opacity-50', 'cursor-not-allowed');
+                document.getElementById('exchange-money').classList.remove('hover:bg-green-600');
+            }
+        }
+        
+
+        
+        // 贴纸兑换小红花
+        function exchangeStickerToFlower() {
+            if (data.stickers < 3) {
+                showModal('兑换失败', '贴纸数量不足，需要3个贴纸才能兑换1朵小红花！');
+                return;
+            }
+            
+            const exchangeCount = Math.floor(data.stickers / 3);
+            data.stickers -= exchangeCount * 3;
+            data.flowers += exchangeCount;
+            
+            updateUI();
+            addHistory('reward', 'flower', exchangeCount, `兑换${exchangeCount * 3}个贴纸`);
+            
+            showModal('兑换成功', `成功用${exchangeCount * 3}个贴纸兑换了${exchangeCount}朵小红花！`);
+        }
+        
+        // 小红花兑换零花钱
+        function exchangeFlowerToMoney() {
+            if (data.flowers < 5) {
+                showModal('兑换失败', '小红花数量不足，需要5朵小红花才能兑换1元零花钱！');
+                return;
+            }
+            
+            const exchangeCount = Math.floor(data.flowers / 5);
+            data.flowers -= exchangeCount * 5;
+            data.money += exchangeCount;
+            
+            updateUI();
+            addHistory('reward', 'money', exchangeCount, `兑换${exchangeCount * 5}朵小红花`);
+            
+            showModal('兑换成功', `成功用${exchangeCount * 5}朵小红花兑换了${exchangeCount}元零花钱！`);
+        }
+        
+        // 导出数据
+        function exportData() {
+            const dataStr = JSON.stringify(data);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `reward-system-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(link.href);
+        }
+        
+        // 导入数据
+        function importData() {
+            const fileInput = document.getElementById('file-input');
+            fileInput.click();
+            
+            fileInput.onchange = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        
+                        // 验证数据格式
+                        if (!importedData.stickers || !importedData.flowers || !importedData.money || !importedData.history) {
+                            showModal('导入失败', '数据格式不正确，请检查文件！');
+                            return;
+                        }
+                        
+                        showModal('确认导入', '确定要导入数据吗？当前数据将被覆盖！', () => {
+                            data = importedData;
+                            updateUI();
+                            updateHistoryTable();
+                            showModal('导入成功', '数据导入成功！');
+                        });
+                    } catch (error) {
+                        showModal('导入失败', '文件读取失败，请检查文件格式！');
+                    }
+                };
+                
+                reader.readAsText(file);
+                fileInput.value = ''; // 重置文件输入
+            };
+        }
+        
+        // 重置数据
+        function resetData() {
+            showModal('确认重置', '确定要重置所有数据吗？此操作不可恢复！', () => {
+                data = {
+                    stickers: 0,
+                    flowers: 0,
+                    money: 0,
+                    history: []
+                };
+                
+                updateUI();
+                updateHistoryTable();
+                showModal('重置成功', '所有数据已重置！');
+            });
+        }
+        
+        // 清空历史记录
+        function clearHistory() {
+            showModal('确认清空', '确定要清空所有历史记录吗？此操作不可恢复！', () => {
+                data.history = [];
+                updateHistoryTable();
+                showModal('清空成功', '历史记录已清空！');
+            });
+        }
+        
+        // 搜索历史记录
+        function searchHistory() {
+            const searchInput = document.getElementById('search-history');
+            const searchTerm = searchInput.value.toLowerCase();
+            const historyContainer = document.getElementById('history-container');
+            const cards = historyContainer.querySelectorAll('.history-card');
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                
+                if (text.includes(searchTerm) || searchTerm === '') {
+                    card.style.display = 'block';
+                    card.style.opacity = '1';
+                } else {
+                    card.style.opacity = '0.3';
+                }
+            });
+        }
+        
+        // 初始化事件监听
+        function initEventListeners() {
+            // 添加贴纸按钮
+            document.getElementById('add-sticker').addEventListener('click', () => {
+                const reason = prompt('请输入奖励原因（可选）：');
+                addSticker(1, reason || '');
+            });
+            
+            // 添加小红花按钮
+            document.getElementById('add-flower').addEventListener('click', () => {
+                const reason = prompt('请输入奖励原因（可选）：');
+                addFlower(1, reason || '');
+            });
+            
+            // 添加零花钱按钮
+            document.getElementById('add-money').addEventListener('click', () => {
+                const amount = parseFloat(prompt('请输入添加的零花钱金额：'));
+                if (isNaN(amount) || amount <= 0) {
+                    alert('请输入有效的金额！');
+                    return;
+                }
+                
+                const reason = prompt('请输入奖励原因（可选）：');
+                addMoney(amount, reason || '');
+            });
+            
+            // 扣除小红花按钮
+            document.getElementById('deduct-flower').addEventListener('click', () => {
+                const amount = parseInt(prompt('请输入扣除的小红花数量：'));
+                if (isNaN(amount) || amount <= 0) {
+                    alert('请输入有效的数量！');
+                    return;
+                }
+                
+                const reason = prompt('请输入扣除原因（可选）：');
+                deductFlower(amount, reason || '');
+            });
+            
+            // 贴纸兑换小红花按钮
+            document.getElementById('exchange-flower').addEventListener('click', exchangeStickerToFlower);
+            
+            // 小红花兑换零花钱按钮
+            document.getElementById('exchange-money').addEventListener('click', exchangeFlowerToMoney);
+            
+
+            
+            // 导出数据按钮
+            document.getElementById('export-data').addEventListener('click', exportData);
+            
+            // 导入数据按钮
+            document.getElementById('import-data').addEventListener('click', importData);
+            
+            // 重置数据按钮
+            document.getElementById('reset-data').addEventListener('click', resetData);
+            
+            // 清空历史记录按钮
+            document.getElementById('clear-history').addEventListener('click', clearHistory);
+            
+            // 搜索历史记录输入框
+            document.getElementById('search-history').addEventListener('input', searchHistory);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            initEventListeners();
+        });
+    </script>
+</body>
+</html>
