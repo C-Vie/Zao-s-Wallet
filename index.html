@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>养成好习惯</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "微软雅黑", sans-serif;
+        }
+
+        body {
+            background-color: #fef7f3;
+            max-width: 620px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .title {
+            text-align: center;
+            color: #f28482;
+            font-size: 30px;
+            margin-bottom: 28px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 22px;
+            padding: 32px 26px;
+            box-shadow: 0 6px 18px rgba(242, 132, 130, 0.12);
+        }
+
+        .score-box {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .item {
+            flex: 1;
+            padding: 18px 10px;
+            border-radius: 16px;
+        }
+
+        .item:nth-child(1) {
+            background-color: #ffe5e5;
+        }
+        .item:nth-child(2) {
+            background-color: #e0f4ff;
+        }
+        .item:nth-child(3) {
+            background-color: #e6f9e9;
+        }
+
+        .item h3 {
+            color: #555;
+            font-size: 15px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .item .num {
+            font-size: 34px;
+            font-weight: 700;
+        }
+        .item:nth-child(1) .num {
+            color: #ef6b6b;
+        }
+        .item:nth-child(2) .num {
+            color: #4299e1;
+        }
+        .item:nth-child(3) .num {
+            color: #48bb78;
+        }
+
+        .item small {
+            color: #777;
+            font-size: 13px;
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 16px 12px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 12px rgba(0,0,0,0.08);
+        }
+
+        .btn-add {
+            background-color: #ffe8a3;
+            color: #5c4b00;
+            grid-column: span 2;
+        }
+
+        .btn-time {
+            background-color: #bde0fe;
+            color: #1a5f99;
+        }
+
+        .btn-money {
+            background-color: #c7f9cc;
+            color: #1b7530;
+        }
+
+        .btn-use-time {
+            background-color: #ffd6c8;
+            color: #a3472c;
+            grid-column: span 2;
+        }
+
+        .btn-rule {
+            background-color: #e9d5ff;
+            color: #5c2c82;
+            grid-column: span 2;
+        }
+
+        /* 隐蔽清除按钮 */
+        .reset-wrap {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .btn-reset {
+            background: #f3f3f3;
+            color: #999;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-reset:hover {
+            background: #e6e6e6;
+            color: #666;
+        }
+
+        /* 规则弹窗样式 */
+        .modal-mask {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-box {
+            background: #fff;
+            border-radius: 20px;
+            max-width: 520px;
+            width: 100%;
+            padding: 28px;
+        }
+        .modal-box h2 {
+            color: #f28482;
+            margin-bottom: 16px;
+            text-align: center;
+            font-size: 22px;
+        }
+        .rule-list {
+            line-height: 1.8;
+            color: #444;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+        .rule-list li {
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+        .close-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            background: #fef7f3;
+            color: #555;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">养成好习惯</h1>
+
+    <div class="card">
+        <div class="score-box">
+            <div class="item">
+                <h3>当前小红花</h3>
+                <div class="num" id="flowerNum">0</div>
+            </div>
+            <div class="item">
+                <h3>剩余电子时间</h3>
+                <div class="num" id="timeNum">0</div>
+                <small>分钟</small>
+            </div>
+            <div class="item">
+                <h3>剩余零花钱</h3>
+                <div class="num" id="moneyNum">0</div>
+                <small>元</small>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-add" id="addFlower">认真完成任务，奖励1朵小红花</button>
+            <button class="btn btn-time" id="exchangeTime">兑换10分钟电子时间（消耗1朵）</button>
+            <button class="btn btn-money" id="exchangeMoney">兑换1元零花钱（消耗5朵）</button>
+            <button class="btn btn-use-time" id="useElectTime">消耗电子产品使用时长</button>
+            <button class="btn btn-rule" id="openRule">好习惯奖励规则</button>
+        </div>
+
+        <div class="reset-wrap">
+            <button class="btn-reset" id="resetData">清除所有数据</button>
+        </div>
+    </div>
+
+    <!-- 规则弹窗 -->
+    <div class="modal-mask" id="ruleModal">
+        <div class="modal-box">
+            <h2>好习惯奖励规则</h2>
+            <ul class="rule-list">
+                <li>1. 认真吃饭：端正坐姿，餐桌干净无饭粒，不挑食不拖拉</li>
+                <li>2. 专心写作业：全程专注不分心，不边写边玩耍、不做无关事情</li>
+                <li>3. 认真洗漱：按时有序完成洗漱，不磨蹭玩耍</li>
+                <li>4. 准时上学：按时起床出门，上学不迟到</li>
+                <li>5. 按时睡觉：上床后安静不说话，乖乖入睡，不拖延作息</li>
+            </ul>
+            <ul class="rule-list">
+                <li>✅ 每认真完成以上任意一项，即可获得1朵小红花</li>
+                <li>🔖 1朵小红花 = 兑换10分钟电子产品使用时间</li>
+                <li>💰 5朵小红花 = 兑换1元零花钱</li>
+            </ul>
+            <button class="close-btn" id="closeRule">我已了解，关闭</button>
+        </div>
+    </div>
+
+    <script>
+        let data = JSON.parse(localStorage.getItem('childReward')) || {
+            flower: 0,
+            time: 0,
+            money: 0
+        };
+
+        const flowerNum = document.getElementById('flowerNum');
+        const timeNum = document.getElementById('timeNum');
+        const moneyNum = document.getElementById('moneyNum');
+        const addFlowerBtn = document.getElementById('addFlower');
+        const exchangeTimeBtn = document.getElementById('exchangeTime');
+        const exchangeMoneyBtn = document.getElementById('exchangeMoney');
+        const useElectTimeBtn = document.getElementById('useElectTime');
+        const resetDataBtn = document.getElementById('resetData');
+        const openRuleBtn = document.getElementById('openRule');
+        const closeRuleBtn = document.getElementById('closeRule');
+        const ruleModal = document.getElementById('ruleModal');
+
+        function updatePage() {
+            flowerNum.textContent = data.flower;
+            timeNum.textContent = data.time;
+            moneyNum.textContent = data.money;
+            saveData();
+        }
+
+        function saveData() {
+            localStorage.setItem('childReward', JSON.stringify(data));
+        }
+
+        // 打开规则弹窗
+        openRuleBtn.addEventListener('click', () => {
+            ruleModal.style.display = 'flex';
+        });
+        // 关闭规则弹窗
+        closeRuleBtn.addEventListener('click', () => {
+            ruleModal.style.display = 'none';
+        });
+
+        // 奖励小红花
+        addFlowerBtn.addEventListener('click', () => {
+            data.flower += 1;
+            updatePage();
+        });
+
+        // 兑换电子时间
+        exchangeTimeBtn.addEventListener('click', () => {
+            if(data.flower < 1) {
+                alert('小红花不足，无法兑换哦！');
+                return;
+            }
+            data.flower -= 1;
+            data.time += 10;
+            updatePage();
+        });
+
+        // 兑换零花钱
+        exchangeMoneyBtn.addEventListener('click', () => {
+            if(data.flower < 5) {
+                alert('小红花不足，至少需要5朵才能兑换1元零花钱！');
+                return;
+            }
+            data.flower -= 5;
+            data.money += 1;
+            updatePage();
+        });
+
+        // 消耗电子时长
+        useElectTimeBtn.addEventListener('click', () => {
+            let useMin = prompt('请输入本次使用电子产品时长（单位：分钟）：');
+            if (useMin === null) return;
+            useMin = Number(useMin);
+            if (isNaN(useMin) || useMin <= 0) {
+                alert('请输入有效的正数时长！');
+                return;
+            }
+            if (useMin > data.time) {
+                alert(`剩余只有${data.time}分钟，不能使用${useMin}分钟哦！`);
+                return;
+            }
+            data.time -= useMin;
+            updatePage();
+        });
+
+        // 双重确认清除数据
+        resetDataBtn.addEventListener('click', () => {
+            const firstConfirm = confirm('确定要清除全部数据吗？所有小红花、时长、零花钱都会清空且无法恢复！');
+            if (!firstConfirm) return;
+            const secondConfirm = confirm('再次确认：真的要永久清空所有数据吗？确认后不可撤回！');
+            if (secondConfirm) {
+                data = { flower: 0, time: 0, money: 0 };
+                updatePage();
+                alert('所有数据已成功清空！');
+            }
+        });
+
+        updatePage();
+    </script>
+</body>
+</html>
